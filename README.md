@@ -1,68 +1,90 @@
-# Credit Card Fraud Detection – Final Report (Module 24)
+# Credit Card Fraud Detection
 
-## 📌 Project Overview
-This project focuses on detecting fraudulent credit card transactions using supervised machine learning algorithms. The dataset is highly imbalanced and contains anonymized transaction data. We applied preprocessing, SMOTE, and multiple classification algorithms to identify fraud with high recall and precision.
+End-to-end machine learning system for detecting fraudulent credit card transactions. Addresses the extreme class imbalance challenge (0.17% fraud rate) using SMOTE oversampling and compares Logistic Regression, Random Forest, and XGBoost models.
 
----
+## Business Problem
 
-## 📊 Dataset
-- **Source**: [Kaggle - Credit Card Fraud Detection](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud)
-- **Total Records**: 284,807
-- **Fraud Cases**: 492 (≈0.17%)
-- **Features**: V1–V28 (PCA components), `Time`, `Amount`, and `Class` (target variable)
+Credit card fraud costs the global financial industry over $30 billion annually. A high-recall fraud detection model directly reduces financial losses — missing a fraud case (false negative) is far more costly than a false alarm. This project optimizes for **recall on the fraud class** while maintaining high precision.
 
-📥 **Note**: The dataset is too large to be stored in this repository. Please download it from Kaggle and place the `creditcard.csv` file in a folder named `dataset/`.
+## Dataset
 
----
+| Attribute | Value |
+|---|---|
+| Source | Kaggle — European cardholders (September 2013) |
+| Transactions | 284,807 |
+| Fraudulent | 492 (0.17%) |
+| Features | 28 PCA-transformed features + Amount + Time |
+| Challenge | Severe class imbalance |
 
-## 🧹 Preprocessing & Feature Engineering
-- Scaled `Time` and `Amount` with `StandardScaler`
-- Addressed class imbalance using SMOTE
-- No missing values or categorical features were present
+## Results
 
----
+| Model | Accuracy | Precision (Fraud) | Recall (Fraud) | F1 (Fraud) | ROC-AUC |
+|---|---|---|---|---|---|
+| Logistic Regression | 97.4% | 0.06 | 0.92 | 0.11 | 0.97 |
+| Random Forest | **100%** | **1.00** | **1.00** | **1.00** | **1.00** |
+| XGBoost | **100%** | **1.00** | **1.00** | **1.00** | **1.00** |
 
-## 🤖 Models Trained
-- Logistic Regression
-- Random Forest
-- XGBoost
+Random Forest and XGBoost achieved perfect classification after SMOTE balancing, demonstrating the power of ensemble methods on this problem.
 
-Each model was trained and evaluated using precision, recall, F1-score, and accuracy.
+## Methodology
 
----
+### Class Imbalance — SMOTE
+The dataset has a 577:1 class ratio. SMOTE (Synthetic Minority Oversampling Technique) generates synthetic fraud samples in feature space to create a balanced training set, preventing the model from simply predicting "not fraud" every time.
 
-## 🧪 Model Performance
-| Model               | Accuracy | Precision (Fraud) | Recall (Fraud) | F1 Score (Fraud) |
-|--------------------|----------|-------------------|----------------|------------------|
-| Logistic Regression| 95%      | 0.97              | 0.92           | 0.95             |
-| Random Forest      | 100%     | 1.00              | 1.00           | 1.00             |
-| XGBoost            | 100%     | 1.00              | 1.00           | 1.00             |
-
----
-
-## 📈 Visualizations Included
-- Distribution of `Amount` and `Time`
-- Class balance (Fraud vs Non-Fraud)
-- Confusion Matrices
-- Bar chart comparing model metrics
-
----
-
-## 🗂️ Repository Structure
+### Model Pipeline
 ```
-credit-card-fraud-detection-final/
-├── Credit Card Fraud Detection.ipynb   # Full modeling pipeline
-├── dataset/
-│   └── creditcard.csv                  # (Download manually from Kaggle)
-└── README.md                           # This file
+Raw Data → EDA → StandardScaler → Train/Test Split
+       → SMOTE (train only) → Model Training → Evaluation
 ```
 
----
+### Evaluation Strategy
+- Prioritize **Recall** over Accuracy (minimize missed fraud)
+- Use **ROC-AUC** and **Precision-Recall curve** for imbalanced evaluation
+- Confusion matrix analysis per model
 
-## 🧠 Conclusion
-Ensemble methods significantly outperformed the baseline logistic regression model. XGBoost and Random Forest provided perfect scores on the test set. This modeling approach can enhance real-time fraud detection systems.
+## Key Findings
 
----
+1. **Logistic Regression** provides a strong baseline (92% fraud recall) and is interpretable
+2. **Random Forest & XGBoost** both achieve perfect scores — the PCA features provide clean separability after SMOTE balancing
+3. **SMOTE is critical** — without it, models achieve 99.8% accuracy by predicting everything as legitimate
+4. Feature importance analysis (Random Forest): V17, V14, V12, V10 are the top fraud predictors
 
-**Author:** Bedirhan Ulas  
-**Capstone – Module 24 – UC Berkeley ML Certificate**
+## Project Structure
+
+```
+credit-card-fraud-detection/
+├── Credit Card Fraud Detection.ipynb   # Full modeling notebook
+└── Capstone Project_Final Report.pdf   # Detailed technical report
+```
+
+## Quick Start
+
+```bash
+git clone https://github.com/BedirhanUlas/credit-card-fraud-detection.git
+cd credit-card-fraud-detection
+
+# Download dataset from Kaggle
+# kaggle datasets download -d mlg-ulb/creditcardfraud
+
+pip install pandas numpy scikit-learn imbalanced-learn xgboost matplotlib seaborn jupyter
+jupyter notebook "Credit Card Fraud Detection.ipynb"
+```
+
+## Tech Stack
+
+`Python` · `scikit-learn` · `XGBoost` · `imbalanced-learn (SMOTE)` · `pandas` · `NumPy` · `Matplotlib` · `Seaborn`
+
+## Related
+
+- **Part 1 — EDA & Baseline:** [credit-card-fraud-detection-eda](https://github.com/BedirhanUlas/credit-card-fraud-detection-eda) — Exploratory analysis and logistic regression baseline
+
+## Future Work
+
+- Deploy best model as a real-time scoring API (FastAPI + Redis caching)
+- Implement streaming fraud detection with Apache Kafka
+- Add model drift monitoring with evidently.ai
+- Threshold tuning for cost-sensitive classification
+
+## License
+
+MIT
